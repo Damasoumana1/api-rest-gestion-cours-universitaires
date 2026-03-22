@@ -1,0 +1,287 @@
+openapi: 3.0.0
+info:
+  title: API Gestion des Cours & Étudiants
+  version: 2.0.0
+  description: API REST de gestion des cours universitaires avec authentification JWT
+servers:
+  - url: http://localhost:3000/api
+    description: Serveur principal
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    AuthRegister:
+      type: object
+      required:
+        - nom
+        - email
+        - password
+      properties:
+        nom:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+    AuthLogin:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+    EtudiantInput:
+      type: object
+      required:
+        - nom
+        - prenom
+        - email
+        - niveau
+      properties:
+        nom:
+          type: string
+        prenom:
+          type: string
+        email:
+          type: string
+        niveau:
+          type: string
+          example: "L1"
+    CoursInput:
+      type: object
+      required:
+        - titre
+        - enseignant
+        - volumeHoraire
+        - actif
+      properties:
+        titre:
+          type: string
+        enseignant:
+          type: string
+        volumeHoraire:
+          type: integer
+          minimum: 1
+        actif:
+          type: boolean
+    CoursPatch:
+      type: object
+      properties:
+        titre:
+          type: string
+        enseignant:
+          type: string
+        volumeHoraire:
+          type: integer
+          minimum: 1
+        actif:
+          type: boolean
+paths:
+  /auth/register:
+    post:
+      summary: Inscription
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRegister'
+      responses:
+        '201':
+          description: Utilisateur créé
+  /auth/login:
+    post:
+      summary: Connexion
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthLogin'
+      responses:
+        '200':
+          description: Connexion réussie, renvoie le token JWT
+  /cours:
+    get:
+      summary: Lister les cours
+      tags: [Cours]
+      responses:
+        '200':
+          description: Liste de cours en JSON
+    post:
+      summary: Créer un cours (Protégé)
+      tags: [Cours]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CoursInput'
+      responses:
+        '201':
+          description: Cours créé
+  /cours/{id}:
+    get:
+      summary: Consulter un cours
+      tags: [Cours]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Cours trouvé
+    put:
+      summary: Modifier un cours (Protégé)
+      tags: [Cours]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CoursInput'
+      responses:
+        '200':
+          description: Mise à jour réussie
+    patch:
+      summary: Modifier partiellement un cours (Protégé)
+      tags: [Cours]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CoursPatch'
+      responses:
+        '200':
+          description: Mise à jour réussie
+    delete:
+      summary: Supprimer un cours (Protégé)
+      tags: [Cours]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Suppression réussie
+  /etudiants:
+    get:
+      summary: Lister les étudiants
+      tags: [Étudiants]
+      responses:
+        '200':
+          description: Liste d'étudiants
+    post:
+      summary: Ajouter un étudiant (Protégé)
+      tags: [Étudiants]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EtudiantInput'
+      responses:
+        '201':
+          description: Étudiant créé
+  /etudiants/{id}:
+    get:
+      summary: Consulter un étudiant
+      tags: [Étudiants]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Étudiant trouvé
+    put:
+      summary: Modifier un étudiant (Protégé)
+      tags: [Étudiants]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EtudiantInput'
+      responses:
+        '200':
+          description: Étudiant mis à jour
+    patch:
+      summary: Modifier partiellement un étudiant (Protégé)
+      tags: [Étudiants]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Modification réussie
+    delete:
+      summary: Supprimer un étudiant (Protégé)
+      tags: [Étudiants]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Étudiant supprimé
