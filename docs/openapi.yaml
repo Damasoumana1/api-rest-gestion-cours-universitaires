@@ -1,126 +1,98 @@
 openapi: 3.0.0
 info:
-  title: API Gestion des Cours & Étudiants
-  version: 2.0.0
-  description: API REST de gestion des cours universitaires avec authentification JWT
+  title: API Gestion des Cours Universitaires
+  version: 1.0.0
+  description: API REST de gestion des cours universitaires (CRUD complet)
 servers:
   - url: http://localhost:3000/api
-    description: Serveur principal
+    description: Serveur local de développement
 components:
-  securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
   schemas:
-    AuthRegister:
-      type: object
-      required:
-        - nom
-        - email
-        - password
-      properties:
-        nom:
-          type: string
-        email:
-          type: string
-        password:
-          type: string
-    AuthLogin:
-      type: object
-      required:
-        - email
-        - password
-      properties:
-        email:
-          type: string
-        password:
-          type: string
-    EtudiantInput:
-      type: object
-      required:
-        - nom
-        - prenom
-        - email
-        - niveau
-      properties:
-        nom:
-          type: string
-        prenom:
-          type: string
-        email:
-          type: string
-        niveau:
-          type: string
-          example: "L1"
     CoursInput:
       type: object
       required:
         - titre
         - enseignant
         - volumeHoraire
-        - actif
       properties:
         titre:
           type: string
+          example: "Services Web"
         enseignant:
           type: string
+          example: "Dr. Somda"
         volumeHoraire:
           type: integer
           minimum: 1
+          example: 30
         actif:
           type: boolean
+          default: true
+          example: true
     CoursPatch:
       type: object
       properties:
         titre:
           type: string
+          example: "Services Web Avancés"
         enseignant:
           type: string
+          example: "Dr. Somda"
         volumeHoraire:
           type: integer
           minimum: 1
+          example: 40
         actif:
           type: boolean
+          example: false
+    CoursResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        titre:
+          type: string
+          example: "Services Web"
+        enseignant:
+          type: string
+          example: "Dr. Somda"
+        volume_horaire:
+          type: integer
+          example: 30
+        actif:
+          type: boolean
+          example: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
 paths:
-  /auth/register:
-    post:
-      summary: Inscription
-      tags: [Auth]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AuthRegister'
-      responses:
-        '201':
-          description: Utilisateur créé
-  /auth/login:
-    post:
-      summary: Connexion
-      tags: [Auth]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AuthLogin'
-      responses:
-        '200':
-          description: Connexion réussie, renvoie le token JWT
   /cours:
     get:
-      summary: Lister les cours
+      summary: Lister tous les cours
       tags: [Cours]
       responses:
         '200':
-          description: Liste de cours en JSON
+          description: Liste de tous les cours
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CoursResponse'
     post:
-      summary: Créer un cours (Protégé)
+      summary: Créer un cours
       tags: [Cours]
-      security:
-        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -129,10 +101,23 @@ paths:
               $ref: '#/components/schemas/CoursInput'
       responses:
         '201':
-          description: Cours créé
+          description: Cours créé avec succès
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/CoursResponse'
+        '400':
+          description: Données invalides
   /cours/{id}:
     get:
-      summary: Consulter un cours
+      summary: Consulter un cours par ID
       tags: [Cours]
       parameters:
         - in: path
@@ -140,14 +125,26 @@ paths:
           required: true
           schema:
             type: integer
+          example: 1
       responses:
         '200':
           description: Cours trouvé
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/CoursResponse'
+        '404':
+          description: Cours non trouvé
     put:
-      summary: Modifier un cours (Protégé)
+      summary: Modifier complètement un cours
       tags: [Cours]
-      security:
-        - bearerAuth: []
       parameters:
         - in: path
           name: id
@@ -162,12 +159,14 @@ paths:
               $ref: '#/components/schemas/CoursInput'
       responses:
         '200':
-          description: Mise à jour réussie
+          description: Cours mis à jour avec succès
+        '400':
+          description: Données invalides
+        '404':
+          description: Cours non trouvé
     patch:
-      summary: Modifier partiellement un cours (Protégé)
+      summary: Modifier partiellement un cours (JSON Patch RFC 6902)
       tags: [Cours]
-      security:
-        - bearerAuth: []
       parameters:
         - in: path
           name: id
@@ -177,17 +176,40 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          application/json-patch+json:
             schema:
-              $ref: '#/components/schemas/CoursPatch'
+              type: array
+              items:
+                type: object
+                required: [op, path, value]
+                properties:
+                  op:
+                    type: string
+                    enum: [replace]
+                    example: replace
+                  path:
+                    type: string
+                    enum: [/titre, /enseignant, /volumeHoraire, /actif]
+                    example: /volumeHoraire
+                  value:
+                    example: 40
+            example:
+              - op: replace
+                path: /volumeHoraire
+                value: 40
+              - op: replace
+                path: /actif
+                value: false
       responses:
         '200':
-          description: Mise à jour réussie
+          description: Cours modifié partiellement
+        '400':
+          description: Opération invalide ou aucun champ fourni
+        '404':
+          description: Cours non trouvé
     delete:
-      summary: Supprimer un cours (Protégé)
+      summary: Supprimer un cours
       tags: [Cours]
-      security:
-        - bearerAuth: []
       parameters:
         - in: path
           name: id
@@ -196,92 +218,6 @@ paths:
             type: integer
       responses:
         '204':
-          description: Suppression réussie
-  /etudiants:
-    get:
-      summary: Lister les étudiants
-      tags: [Étudiants]
-      responses:
-        '200':
-          description: Liste d'étudiants
-    post:
-      summary: Ajouter un étudiant (Protégé)
-      tags: [Étudiants]
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/EtudiantInput'
-      responses:
-        '201':
-          description: Étudiant créé
-  /etudiants/{id}:
-    get:
-      summary: Consulter un étudiant
-      tags: [Étudiants]
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Étudiant trouvé
-    put:
-      summary: Modifier un étudiant (Protégé)
-      tags: [Étudiants]
-      security:
-        - bearerAuth: []
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/EtudiantInput'
-      responses:
-        '200':
-          description: Étudiant mis à jour
-    patch:
-      summary: Modifier partiellement un étudiant (Protégé)
-      tags: [Étudiants]
-      security:
-        - bearerAuth: []
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-      responses:
-        '200':
-          description: Modification réussie
-    delete:
-      summary: Supprimer un étudiant (Protégé)
-      tags: [Étudiants]
-      security:
-        - bearerAuth: []
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: integer
-      responses:
-        '204':
-          description: Étudiant supprimé
+          description: Cours supprimé avec succès
+        '404':
+          description: Cours non trouvé

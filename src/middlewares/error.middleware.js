@@ -9,7 +9,7 @@ const errorHandler = (err, req, res, next) => {
     console.error('System Error:', err);
   }
 
-  return ApiResponse.error(res, message, null, statusCode);
+  return ApiResponse.error(res, message, statusCode);
 };
 
 module.exports = errorHandler;

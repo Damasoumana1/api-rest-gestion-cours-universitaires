@@ -5,21 +5,17 @@ class ApiResponse {
       message
     };
     if (data !== null) {
-        response.data = data;
+      response.data = data;
     }
     return res.status(statusCode).json(response);
   }
 
-  static error(res, message, errors = null, statusCode = 400) {
-    const response = {
-      success: false,
-      message,
+  // Format d'erreur standard conforme au TP (RFC / bonnes pratiques REST)
+  static error(res, message, statusCode = 400) {
+    return res.status(statusCode).json({
+      error: message,
       timestamp: new Date().toISOString()
-    };
-    if (errors !== null) {
-        response.errors = errors;
-    }
-    return res.status(statusCode).json(response);
+    });
   }
 }
 

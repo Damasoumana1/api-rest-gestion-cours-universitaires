@@ -1,8 +1,8 @@
 {
-  "name": "cours-api",
+  "name": "api-rest-gestion-cours-universitaires",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "API REST de gestion des cours universitaires",
+  "main": "src/server.js",
   "directories": {
     "doc": "docs"
   },
@@ -15,11 +15,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
-    "jsonwebtoken": "^9.0.3",
     "pg": "^8.20.0",
     "swagger-ui-express": "^5.0.1",
     "yamljs": "^0.3.0"
