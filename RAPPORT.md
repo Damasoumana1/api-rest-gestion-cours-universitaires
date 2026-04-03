@@ -67,7 +67,7 @@ GET /api/cours/1
 ```http
 DELETE /api/cours/1
 ```
-✔ **Résultat :** Code statut `204 No Content` signalant que l'élément a bien été supprimé, sans retourner de corps de message.
+✔ **Résultat :** L'API supprime le cours correspondant à l'ID `1` en base de données. Le code statut retourné est `204 No Content`, signalant que l'élément a bien été supprimé et sans retourner de corps de message.
 
 ---
 
@@ -152,14 +152,21 @@ Pour éviter l'insertion de données incohérentes, l'API vérifie systématique
 
 ## Annexes
 
+### Technologies Utilisées
+Ce projet a été développé en respectant les standards de l'industrie, avec la stack suivante :
+- **Node.js & Express.js** : Pour la construction rapide et robuste du serveur REST.
+- **PostgreSQL** : Système de gestion de base de données relationnelle puissant pour assurer l'intégrité de nos cours.
+- **Swagger / OpenAPI** : Définition, conception et test graphique interactif de l'API REST.
+
+### Dépôt Git
+Le code source complet de cette API, l'historique des commits démontrant l'évolution du projet, ainsi que son architecture, sont disponibles et hébergés de manière publique sur GitHub à l'adresse suivante :  
+🔗 **[https://github.com/Damasoumana1/api-rest-gestion-cours-universitaires](https://github.com/Damasoumana1/api-rest-gestion-cours-universitaires)**
+
 ### Récapitulatif des tests effectués
 Les tests ont validé le bon acheminement des requêtes REST au format JSON, le bon comportement des traitements en base de données via PostgreSQL, et la gestion des exceptions standards grâce au gestionnaire d'erreur global.
 
 ### Commandes curl équivalentes
 Voici un exemple de test rapide avec cURL depuis le terminal :
-```bash
-curl -X GET http://localhost:3000/api/cours
-```
 ```bash
 curl -X POST http://localhost:3000/api/cours \
   -H "Content-Type: application/json" \
@@ -167,6 +174,6 @@ curl -X POST http://localhost:3000/api/cours \
 ```
 
 ### Accès à la documentation Swagger UI
-Pour une interactivité complète et visuelle, une interface Swagger documentant toutes ces routes (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`) est accessible sur :
+Pour une interactivité complète et visuelle, une interface Swagger documentant toutes ces routes (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`) est accessible en lançant l'API sur le port 3000 :
 👉 **[http://localhost:3000/api-docs](http://localhost:3000/api-docs)**
 L'interface permet de tester en direct toutes les fonctionnalités décrites au sein de ce rapport.
